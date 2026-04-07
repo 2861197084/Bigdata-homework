@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for f:*)",
+      "Bash(do touch:*)",
+      "Bash(done)",
+      "Bash(uv sync:*)",
+      "Bash(curl -sL \"https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js\" -o src/airscope/assets/js/echarts.min.js)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json\" -o src/airscope/assets/geo/china.json)",
+      "Bash(curl -sL \"https://geojson.cn/api/data/china.json\" -o src/airscope/assets/geo/china.json)",
+      "Bash(uv run python -c ':*)",
+      "Bash(timeout 10 uv run python -m airscope)",
+      "Bash(timeout 8 uv run python -m airscope)",
+      "Bash(uv run:*)",
+      "Bash(.venv/Scripts/python.exe -c ':*)"
+    ]
+  }
+}

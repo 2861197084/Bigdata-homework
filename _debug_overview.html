@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0f1117; }
+body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+    color: #e8eaed;
+}
+
+.dashboard {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.chart-box {
+    background: rgba(26, 29, 39, 0.85);
+    border: 1px solid #2a2d3a;
+    border-radius: 12px;
+    padding: 12px;
+    position: relative;
+    min-height: 0;
+}
+
+.chart-box .chart-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e8eaed;
+    margin-bottom: 8px;
+    padding-left: 4px;
+}
+
+.chart-container {
+    width: 100%;
+    height: calc(100% - 30px);
+    min-height: 200px;
+}
+
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.kpi-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: #8b8fa3;
+    margin-bottom: 8px;
+}
+
+.kpi-value {
+    font-size: 32px;
+    font-weight: 700;
+    font-family: "Consolas", "DIN Alternate", "Roboto Mono", monospace;
+    line-height: 1.1;
+}
+
+.kpi-sub {
+    font-size: 12px;
+    color: #8b8fa3;
+    margin-top: 6px;
+}
+
+.kpi-sub .up { color: #ee6666; }
+.kpi-sub .down { color: #91cc75; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3d4a; }
+</style>
+</head>
+<body>
+
+<!-- Load ECharts from local file -->
+<script src="file:///E:/myf/Programming/PythonProjects/Bigdata-homework/src/airscope/assets/js/echarts.min.js"></script>
+
+<!-- Utility functions -->
+<script>
+var charts = {};
+
+function getAqiColor(value) {
+    if (value <= 50) return '#00e400';
+    if (value <= 100) return '#ffff00';
+    if (value <= 150) return '#ff7e00';
+    if (value <= 200) return '#ff0000';
+    if (value <= 300) return '#8f3f97';
+    return '#7e0023';
+}
+
+function getAqiLabel(value) {
+    if (value <= 50) return '优';
+    if (value <= 100) return '良';
+    if (value <= 150) return '轻度污染';
+    if (value <= 200) return '中度污染';
+    if (value <= 300) return '重度污染';
+    return '严重污染';
+}
+
+function initChart(id) {
+    var dom = document.getElementById(id);
+    if (!dom) { console.error('DOM not found: ' + id); return null; }
+    if (charts[id]) { charts[id].dispose(); }
+    var chart = echarts.init(dom, null, {renderer: 'canvas'});
+    charts[id] = chart;
+    return chart;
+}
+
+function resizeAll() {
+    Object.values(charts).forEach(function(c) {
+        if (c && !c.isDisposed()) c.resize();
+    });
+}
+
+window.addEventListener('resize', resizeAll);
+
+echarts.registerTheme('airscope-dark', {"color": ["#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de", "#3ba272", "#fc8452", "#9a60b4", "#ea7ccc", "#48b8d0"], "backgroundColor": "transparent", "textStyle": {"color": "#e8eaed", "fontFamily": "Microsoft YaHei, PingFang SC, sans-serif"}, "title": {"textStyle": {"color": "#e8eaed", "fontSize": 16, "fontWeight": 500}, "subtextStyle": {"color": "#8b8fa3"}}, "legend": {"textStyle": {"color": "#e8eaed"}}, "tooltip": {"backgroundColor": "rgba(26, 29, 39, 0.95)", "borderColor": "#2a2d3a", "textStyle": {"color": "#e8eaed", "fontSize": 13}}, "axisLine": {"lineStyle": {"color": "#2a2d3a"}}, "splitLine": {"lineStyle": {"color": "#2a2d3a"}}, "categoryAxis": {"axisLine": {"lineStyle": {"color": "#2a2d3a"}}, "axisLabel": {"color": "#8b8fa3"}, "splitLine": {"show": false}}, "valueAxis": {"axisLine": {"lineStyle": {"color": "#2a2d3a"}}, "axisLabel": {"color": "#8b8fa3"}, "splitLine": {"lineStyle": {"color": "rgba(42, 45, 58, 0.6)"}}}});
+</script>
+
+<!-- Page content -->
+
+<div class="dashboard" style="grid-template-rows: auto auto 1fr; grid-template-columns: 1fr 1fr;">
+    <!-- KPI Row -->
+    <div class="kpi-row" style="grid-column: 1 / -1;">
+        <div class="kpi-card" id="kpi-avg">
+            <div class="kpi-label">全国平均 AQI</div>
+            <div class="kpi-value" id="kpi-avg-value">--</div>
+            <div class="kpi-sub" id="kpi-avg-sub"></div>
+        </div>
+        <div class="kpi-card" id="kpi-worst">
+            <div class="kpi-label">最污染城市</div>
+            <div class="kpi-value" id="kpi-worst-value" style="font-size:24px;">--</div>
+            <div class="kpi-sub" id="kpi-worst-sub"></div>
+        </div>
+        <div class="kpi-card" id="kpi-best">
+            <div class="kpi-label">最清洁城市</div>
+            <div class="kpi-value" id="kpi-best-value" style="font-size:24px;">--</div>
+            <div class="kpi-sub" id="kpi-best-sub"></div>
+        </div>
+        <div class="kpi-card" id="kpi-exceed">
+            <div class="kpi-label">超标城市数</div>
+            <div class="kpi-value" id="kpi-exceed-value">--</div>
+            <div class="kpi-sub" id="kpi-exceed-sub"></div>
+        </div>
+    </div>
+
+    <!-- Gauge + Line -->
+    <div class="chart-box" style="grid-column: 1 / -1; height: 300px;">
+        <div class="chart-title">AQI 仪表盘 & 日均趋势</div>
+        <div style="display:flex; height:calc(100% - 30px);">
+            <div id="gauge-chart" style="width:35%; height:100%;"></div>
+            <div id="trend-chart" style="width:65%; height:100%;"></div>
+        </div>
+    </div>
+
+    <!-- Bar + Pie -->
+    <div class="chart-box" style="height: 380px;">
+        <div class="chart-title">Top 10 污染城市</div>
+        <div id="bar-chart" class="chart-container"></div>
+    </div>
+    <div class="chart-box" style="height: 380px;">
+        <div class="chart-title">AQI 等级分布</div>
+        <div id="pie-chart" class="chart-container"></div>
+    </div>
+</div>
+
+<script>
+function updateCharts(data) {
+    // KPI cards
+    var stats = data.stats;
+    document.getElementById('kpi-avg-value').textContent = stats.national_avg_aqi;
+    document.getElementById('kpi-avg-value').style.color = getAqiColor(stats.national_avg_aqi);
+
+    document.getElementById('kpi-worst-value').textContent = stats.worst_city;
+    document.getElementById('kpi-worst-sub').innerHTML = 'AQI: <span style="color:' + getAqiColor(stats.worst_city_aqi) + '">' + stats.worst_city_aqi + '</span>';
+
+    document.getElementById('kpi-best-value').textContent = stats.best_city;
+    document.getElementById('kpi-best-sub').innerHTML = 'AQI: <span style="color:' + getAqiColor(stats.best_city_aqi) + '">' + stats.best_city_aqi + '</span>';
+
+    document.getElementById('kpi-exceed-value').textContent = stats.exceed_count;
+    document.getElementById('kpi-exceed-sub').textContent = '共 ' + stats.total_cities + ' 个城市';
+
+    // Gauge
+    var gauge = initChart('gauge-chart');
+    gauge.setOption({
+        series: [{
+            type: 'gauge',
+            startAngle: 210,
+            endAngle: -30,
+            min: 0,
+            max: 500,
+            axisLine: {
+                lineStyle: {
+                    width: 20,
+                    color: [
+                        [0.1, '#00e400'], [0.2, '#ffff00'], [0.3, '#ff7e00'],
+                        [0.4, '#ff0000'], [0.6, '#8f3f97'], [1, '#7e0023']
+                    ]
+                }
+            },
+            pointer: { itemStyle: { color: '#1e90ff' }, width: 5 },
+            axisTick: { distance: -20, length: 6, lineStyle: { color: '#fff', width: 1 } },
+            splitLine: { distance: -25, length: 20, lineStyle: { color: '#fff', width: 2 } },
+            axisLabel: { color: '#8b8fa3', distance: 30, fontSize: 11 },
+            detail: {
+                valueAnimation: true, fontSize: 28, color: '#e8eaed',
+                formatter: function(v) { return Math.round(v) + '\n' + getAqiLabel(v); },
+                offsetCenter: [0, '70%']
+            },
+            data: [{ value: stats.national_avg_aqi }]
+        }]
+    });
+
+    // Daily trend line
+    var trend = initChart('trend-chart');
+    var trendData = data.trend;
+    trend.setOption({
+        tooltip: { trigger: 'axis' },
+        grid: { left: 50, right: 20, top: 20, bottom: 50 },
+        xAxis: {
+            type: 'category',
+            data: trendData.map(function(d) { return d.date; }),
+            axisLabel: { color: '#8b8fa3', rotate: 30, fontSize: 10 },
+            axisLine: { lineStyle: { color: '#2a2d3a' } }
+        },
+        yAxis: {
+            type: 'value', name: 'AQI',
+            axisLabel: { color: '#8b8fa3' },
+            splitLine: { lineStyle: { color: 'rgba(42,45,58,0.6)' } }
+        },
+        dataZoom: [
+            { type: 'inside', start: 80, end: 100 },
+            { type: 'slider', height: 20, bottom: 5, borderColor: '#2a2d3a',
+              fillerColor: 'rgba(30,144,255,0.2)', handleStyle: { color: '#1e90ff' } }
+        ],
+        series: [{
+            type: 'line', data: trendData.map(function(d) { return d.value; }),
+            smooth: true, showSymbol: false, lineStyle: { width: 2, color: '#1e90ff' },
+            areaStyle: {
+                color: {
+                    type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(30,144,255,0.35)' },
+                        { offset: 1, color: 'rgba(30,144,255,0.02)' }
+                    ]
+                }
+            }
+        }]
+    });
+
+    // Top 10 bar
+    var bar = initChart('bar-chart');
+    var ranking = data.ranking.slice(0, 10).reverse();
+    bar.setOption({
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        grid: { left: 80, right: 30, top: 10, bottom: 10 },
+        xAxis: {
+            type: 'value',
+            axisLabel: { color: '#8b8fa3' },
+            splitLine: { lineStyle: { color: 'rgba(42,45,58,0.6)' } }
+        },
+        yAxis: {
+            type: 'category',
+            data: ranking.map(function(d) { return d.city; }),
+            axisLabel: { color: '#e8eaed', fontSize: 12 }
+        },
+        series: [{
+            type: 'bar', barWidth: '60%',
+            data: ranking.map(function(d) {
+                return { value: d.value, itemStyle: { color: getAqiColor(d.value) } };
+            }),
+            label: {
+                show: true, position: 'right',
+                formatter: function(p) { return p.value; },
+                color: '#e8eaed', fontSize: 11
+            }
+        }]
+    });
+
+    // AQI distribution pie
+    var pie = initChart('pie-chart');
+    var aqiColors = { '优': '#00e400', '良': '#ffff00', '轻度污染': '#ff7e00',
+                      '中度污染': '#ff0000', '重度污染': '#8f3f97', '严重污染': '#7e0023' };
+    pie.setOption({
+        tooltip: { trigger: 'item', formatter: '{b}: {c} 个城市 ({d}%)' },
+        legend: {
+            orient: 'vertical', right: 10, top: 'center',
+            textStyle: { color: '#e8eaed' }
+        },
+        series: [{
+            type: 'pie', radius: ['40%', '70%'],
+            center: ['40%', '50%'],
+            avoidLabelOverlap: true,
+            itemStyle: { borderRadius: 6, borderColor: '#0f1117', borderWidth: 2 },
+            label: { show: false },
+            emphasis: {
+                label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#e8eaed' }
+            },
+            data: data.distribution.map(function(d) {
+                return { name: d.name, value: d.value,
+                         itemStyle: { color: aqiColors[d.name] || '#5470c6' } };
+            })
+        }]
+    });
+
+    resizeAll();
+}
+</script>
+
+
+</body>
+</html>

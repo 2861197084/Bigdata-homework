@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0f1117; }
+body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+    color: #e8eaed;
+}
+
+.dashboard {
+    width: 100%;
+    height: 100%;
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.chart-box {
+    background: rgba(26, 29, 39, 0.85);
+    border: 1px solid #2a2d3a;
+    border-radius: 12px;
+    padding: 12px;
+    position: relative;
+    min-height: 0;
+}
+
+.chart-box .chart-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e8eaed;
+    margin-bottom: 8px;
+    padding-left: 4px;
+}
+
+.chart-container {
+    width: 100%;
+    height: calc(100% - 30px);
+    min-height: 200px;
+}
+
+/* KPI Cards */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.kpi-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: #8b8fa3;
+    margin-bottom: 8px;
+}
+
+.kpi-value {
+    font-size: 32px;
+    font-weight: 700;
+    font-family: "Consolas", "DIN Alternate", "Roboto Mono", monospace;
+    line-height: 1.1;
+}
+
+.kpi-sub {
+    font-size: 12px;
+    color: #8b8fa3;
+    margin-top: 6px;
+}
+
+.kpi-sub .up { color: #ee6666; }
+.kpi-sub .down { color: #91cc75; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3d4a; }
+
+/* AQI colors */
+.aqi-good { color: #00e400; }
+.aqi-moderate { color: #ffff00; }
+.aqi-usg { color: #ff7e00; }
+.aqi-unhealthy { color: #ff0000; }
+.aqi-very-unhealthy { color: #8f3f97; }
+.aqi-hazardous { color: #7e0023; }
+</style>
+</head>
+<body>
+<!-- PAGE_CONTENT will be injected here -->
+
+<script>
+// ECharts and QWebChannel will be loaded by the page
+var charts = {};
+var bridge = null;
+
+function getAqiColor(value) {
+    if (value <= 50) return '#00e400';
+    if (value <= 100) return '#ffff00';
+    if (value <= 150) return '#ff7e00';
+    if (value <= 200) return '#ff0000';
+    if (value <= 300) return '#8f3f97';
+    return '#7e0023';
+}
+
+function getAqiLabel(value) {
+    if (value <= 50) return '优';
+    if (value <= 100) return '良';
+    if (value <= 150) return '轻度污染';
+    if (value <= 200) return '中度污染';
+    if (value <= 300) return '重度污染';
+    return '严重污染';
+}
+
+function initChart(id) {
+    var dom = document.getElementById(id);
+    if (!dom) return null;
+    var chart = echarts.init(dom, null, {renderer: 'canvas'});
+    charts[id] = chart;
+    return chart;
+}
+
+function resizeAll() {
+    Object.values(charts).forEach(function(c) {
+        if (c && !c.isDisposed()) c.resize();
+    });
+}
+
+window.addEventListener('resize', resizeAll);
+
+function updateCharts(dataJson) {
+    // Override per page
+}
+</script>
+</body>
+</html>
