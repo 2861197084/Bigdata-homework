@@ -221,11 +221,11 @@ def health_treemap_data(df: pd.DataFrame) -> list[dict]:
     """Treemap: cities grouped by AQI health level."""
     city_avg = df.groupby("City", observed=True)["AQI"].mean()
     levels = [
-        ("优 (0-50)", 0, 50, "#00e400"),
-        ("良 (51-100)", 51, 100, "#ffff00"),
-        ("轻度污染 (101-150)", 101, 150, "#ff7e00"),
-        ("中度污染 (151-200)", 151, 200, "#ff0000"),
-        ("重度污染 (201-300)", 201, 300, "#8f3f97"),
+        ("优 (0-50)", 0, 50, "#2da44e"),
+        ("良 (51-100)", 51, 100, "#e8a020"),
+        ("轻度污染 (101-150)", 101, 150, "#e07b39"),
+        ("中度污染 (151-200)", 151, 200, "#c0392b"),
+        ("重度污染 (201-300)", 201, 300, "#862e9c"),
     ]
     result = []
     for label, lo, hi, color in levels:

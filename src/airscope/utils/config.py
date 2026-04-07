@@ -9,14 +9,14 @@ PROJECT_ROOT = APP_DIR.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 ASSETS_DIR = APP_DIR / "assets"
 
-# AQI levels per China HJ 633-2012
+# AQI levels — muted palette optimised for light backgrounds
 AQI_LEVELS = [
-    {"label": "优", "min": 0, "max": 50, "color": "#00e400"},
-    {"label": "良", "min": 51, "max": 100, "color": "#ffff00"},
-    {"label": "轻度污染", "min": 101, "max": 150, "color": "#ff7e00"},
-    {"label": "中度污染", "min": 151, "max": 200, "color": "#ff0000"},
-    {"label": "重度污染", "min": 201, "max": 300, "color": "#8f3f97"},
-    {"label": "严重污染", "min": 301, "max": 500, "color": "#7e0023"},
+    {"label": "优",     "min": 0,   "max": 50,  "color": "#2da44e"},   # muted green
+    {"label": "良",     "min": 51,  "max": 100, "color": "#e8a020"},   # warm amber
+    {"label": "轻度污染","min": 101, "max": 150, "color": "#e07b39"},   # muted orange
+    {"label": "中度污染","min": 151, "max": 200, "color": "#c0392b"},   # deep red
+    {"label": "重度污染","min": 201, "max": 300, "color": "#862e9c"},   # purple
+    {"label": "严重污染","min": 301, "max": 500, "color": "#5c2e7e"},   # dark purple
 ]
 
 # App theme colors

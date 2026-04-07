@@ -16,7 +16,7 @@ class HealthPage(BasePage):
     <!-- Triple gauges -->
     <div class="chart-box" style="grid-column: 1 / -1; height: 200px;">
         <div class="chart-title">关键健康指标</div>
-        <div style="display:flex; height:calc(100% - 30px);">
+        <div style="display:flex; height:calc(100% - 35px);">
             <div id="gauge-pm25" style="flex:1;height:100%;"></div>
             <div id="gauge-o3" style="flex:1;height:100%;"></div>
             <div id="gauge-aqi" style="flex:1;height:100%;"></div>
@@ -43,148 +43,122 @@ class HealthPage(BasePage):
 </div>
 
 <script>
+var TT = {backgroundColor:'#fff',borderColor:'#e1e3e5',textStyle:{color:'#303030',fontSize:12},
+          extraCssText:'box-shadow:0 4px 12px rgba(0,0,0,0.1);border-radius:8px;'};
+
 function makeGauge(id, name, value, max, unit) {
     var g = initChart(id);
     g.setOption({
         series: [{
-            type: 'gauge',
-            startAngle: 210, endAngle: -30,
-            min: 0, max: max,
-            axisLine: {
-                lineStyle: { width: 15,
-                    color: [[0.2, '#00e400'], [0.4, '#ffff00'], [0.6, '#ff7e00'],
-                            [0.8, '#ff0000'], [1, '#8f3f97']] }
-            },
-            pointer: { width: 4, itemStyle: { color: '#1e90ff' } },
-            axisTick: { show: false },
-            splitLine: { distance: -15, length: 12, lineStyle: { color: '#fff', width: 1 } },
-            axisLabel: { color: '#8b8fa3', distance: 20, fontSize: 10 },
-            detail: {
-                valueAnimation: true, fontSize: 22, color: '#e8eaed',
-                formatter: function(v) { return Math.round(v) + unit; },
-                offsetCenter: [0, '70%']
-            },
-            title: { color: '#8b8fa3', fontSize: 13, offsetCenter: [0, '90%'] },
-            data: [{ value: value, name: name }]
+            type:'gauge', startAngle:210, endAngle:-30, min:0, max:max,
+            axisLine: {lineStyle:{width:14,
+                color:[[0.2,'#2da44e'],[0.4,'#e8a020'],[0.6,'#e07b39'],[0.8,'#c0392b'],[1,'#862e9c']]}},
+            pointer: {width:4,itemStyle:{color:'#303030'},length:'55%'},
+            axisTick: {show:false},
+            splitLine: {show:false},
+            axisLabel: {show:false},
+            detail: {valueAnimation:true,fontSize:20,color:'#303030',fontWeight:700,
+                     formatter:function(v){return Math.round(v)+unit;},offsetCenter:[0,'70%']},
+            title: {color:'#6d7175',fontSize:12,offsetCenter:[0,'90%']},
+            data: [{value:value,name:name}]
         }]
     });
 }
 
 function updateCharts(data) {
-    // Triple gauges
-    makeGauge('gauge-pm25', 'PM2.5', data.gauges.pm25, 300, ' μg/m³');
-    makeGauge('gauge-o3', 'O3', data.gauges.o3, 300, ' μg/m³');
-    makeGauge('gauge-aqi', 'AQI', data.gauges.aqi, 500, '');
+    makeGauge('gauge-pm25','PM2.5',data.gauges.pm25,300,' μg/m³');
+    makeGauge('gauge-o3','O3',data.gauges.o3,300,' μg/m³');
+    makeGauge('gauge-aqi','AQI',data.gauges.aqi,500,'');
 
-    // Treemap
     var tree = initChart('treemap-chart');
     tree.setOption({
-        tooltip: {
-            formatter: function(p) {
-                if (p.data.children) return p.name;
-                return p.name + '<br>平均 AQI: ' + p.value;
-            }
-        },
+        tooltip: Object.assign({
+            formatter:function(p){
+                if(p.data.children) return p.name;
+                return p.name+'<br>平均 AQI: '+p.value;
+            }}, TT),
         series: [{
-            type: 'treemap',
-            data: data.treemap,
-            roam: false,
+            type:'treemap', data:data.treemap, roam:false,
             breadcrumb: {
-                itemStyle: { color: '#1a1d27', borderColor: '#2a2d3a' },
-                textStyle: { color: '#e8eaed' }
+                itemStyle:{color:'#f0f1f2',borderColor:'#e1e3e5'},
+                textStyle:{color:'#303030'}
             },
             levels: [{
-                itemStyle: { borderColor: '#2a2d3a', borderWidth: 2, gapWidth: 2 },
-                upperLabel: { show: true, height: 24, color: '#e8eaed', fontSize: 12 }
-            }, {
-                itemStyle: { borderColor: '#2a2d3a', borderWidth: 1, gapWidth: 1 },
-                label: { show: true, color: '#e8eaed', fontSize: 11 }
+                itemStyle:{borderColor:'#e1e3e5',borderWidth:2,gapWidth:2},
+                upperLabel:{show:true,height:22,color:'#303030',fontSize:12,fontWeight:600}
+            },{
+                itemStyle:{borderColor:'#e1e3e5',borderWidth:1,gapWidth:1},
+                label:{show:true,color:'#303030',fontSize:11}
             }],
-            label: { show: true, color: '#e8eaed', fontSize: 11 }
+            label:{show:true,color:'#303030',fontSize:11}
         }]
     });
 
-    // Seasonal radar
     var sradar = initChart('season-radar');
-    var pollutants = ['PM2.5', 'PM10', 'SO2', 'NO2', 'CO', 'O3'];
-    var maxVals = { 'PM2.5': 120, 'PM10': 160, 'SO2': 30, 'NO2': 50, 'CO': 1.5, 'O3': 150 };
-    var indicator = pollutants.map(function(p) {
-        return { name: p, max: maxVals[p] };
-    });
-    var seasons = ['春季', '夏季', '秋季', '冬季'];
-    var seasonColors = ['#91cc75', '#ee6666', '#fac858', '#5470c6'];
-    var radarData = seasons.map(function(s, i) {
+    var pollutants = ['PM2.5','PM10','SO2','NO2','CO','O3'];
+    var maxVals = {'PM2.5':120,'PM10':160,'SO2':30,'NO2':50,'CO':1.5,'O3':150};
+    var seasons = ['春季','夏季','秋季','冬季'];
+    var sColors = ['#50b83c','#de3618','#f49342','#5c6ac4'];
+    var radarData = seasons.map(function(s,i){
         return {
-            name: s,
-            value: pollutants.map(function(p) { return data.seasonal[s] ? data.seasonal[s][p] || 0 : 0; }),
-            lineStyle: { color: seasonColors[i] },
-            itemStyle: { color: seasonColors[i] },
-            areaStyle: { color: seasonColors[i], opacity: 0.1 }
+            name:s,
+            value:pollutants.map(function(p){return data.seasonal[s]?data.seasonal[s][p]||0:0;}),
+            lineStyle:{color:sColors[i]},
+            itemStyle:{color:sColors[i]},
+            areaStyle:{color:sColors[i],opacity:0.08}
         };
     });
     sradar.setOption({
-        tooltip: { trigger: 'item' },
-        legend: { data: seasons, textStyle: { color: '#e8eaed' }, bottom: 0 },
+        tooltip: TT,
+        legend: {data:seasons,textStyle:{color:'#6d7175'},bottom:0},
         radar: {
-            indicator: indicator,
-            axisName: { color: '#8b8fa3' },
-            splitArea: { areaStyle: { color: ['rgba(30,144,255,0.03)', 'rgba(30,144,255,0.06)'] } },
-            splitLine: { lineStyle: { color: '#2a2d3a' } },
-            axisLine: { lineStyle: { color: '#2a2d3a' } }
+            indicator:pollutants.map(function(p){return {name:p,max:maxVals[p]};}),
+            axisName:{color:'#6d7175'},
+            splitArea:{areaStyle:{color:['#fafbfc','#f0f1f2']}},
+            splitLine:{lineStyle:{color:'#e1e3e5'}},
+            axisLine:{lineStyle:{color:'#e1e3e5'}}
         },
-        series: [{ type: 'radar', data: radarData }]
+        series: [{type:'radar',data:radarData}]
     });
 
-    // PM2.5 vs Temperature scatter
     var pts = initChart('pm-temp-scatter');
-    var seasonMap = { '春季': '#91cc75', '夏季': '#ee6666', '秋季': '#fac858', '冬季': '#5470c6' };
-    var scatterSeries = {};
-    data.weather.pm_temp.forEach(function(d) {
-        var s = d[2];
-        if (!scatterSeries[s]) scatterSeries[s] = [];
-        scatterSeries[s].push([d[0], d[1]]);
+    var sMap = {'春季':'#50b83c','夏季':'#de3618','秋季':'#f49342','冬季':'#5c6ac4'};
+    var groups = {};
+    data.weather.pm_temp.forEach(function(d){
+        if(!groups[d[2]]) groups[d[2]]=[];
+        groups[d[2]].push([d[0],d[1]]);
     });
-    var ptsSeries = Object.keys(scatterSeries).map(function(s) {
-        return {
-            name: s, type: 'scatter', data: scatterSeries[s],
-            symbolSize: 5,
-            itemStyle: { color: seasonMap[s] || '#5470c6', opacity: 0.6 }
-        };
+    var ptsSeries = Object.keys(groups).map(function(s){
+        return {name:s,type:'scatter',data:groups[s],symbolSize:4,
+                itemStyle:{color:sMap[s]||'#5c6ac4',opacity:0.5}};
     });
     pts.setOption({
-        tooltip: { formatter: function(p) { return p.seriesName+'<br>温度: '+p.data[0]+'°C<br>PM2.5: '+p.data[1]; } },
-        legend: { data: Object.keys(scatterSeries), textStyle: { color: '#e8eaed' }, top: 0 },
-        grid: { left: 55, right: 20, top: 35, bottom: 40 },
-        xAxis: { name: '温度 (°C)', axisLabel: { color: '#8b8fa3' },
-                 splitLine: { lineStyle: { color: 'rgba(42,45,58,0.6)' } },
-                 axisLine: { lineStyle: { color: '#2a2d3a' } } },
-        yAxis: { name: 'PM2.5 (μg/m³)', axisLabel: { color: '#8b8fa3' },
-                 splitLine: { lineStyle: { color: 'rgba(42,45,58,0.6)' } },
-                 axisLine: { lineStyle: { color: '#2a2d3a' } } },
+        tooltip: Object.assign({formatter:function(p){return p.seriesName+'<br>温度: '+p.data[0]+'°C<br>PM2.5: '+p.data[1];}}, TT),
+        legend: {data:['春季','夏季','秋季','冬季'],textStyle:{color:'#6d7175'},bottom:0,itemGap:12},
+        grid: {left:50,right:16,top:8,bottom:42},
+        xAxis: {name:'温度 (°C)',axisLabel:{color:'#6d7175'},
+                splitLine:{lineStyle:{color:'#f0f1f2'}},
+                axisLine:{lineStyle:{color:'#e1e3e5'}},axisTick:{show:false}},
+        yAxis: {name:'PM2.5 (μg/m³)',axisLabel:{color:'#6d7175'},
+                splitLine:{lineStyle:{color:'#f0f1f2'}},axisLine:{show:false},axisTick:{show:false}},
         series: ptsSeries
     });
 
-    // Wind vs AQI bubble
     var wb = initChart('wind-aqi-scatter');
     wb.setOption({
-        tooltip: {
-            formatter: function(p) { return '风速: '+p.data[0]+' m/s<br>AQI: '+p.data[1]+'<br>PM2.5: '+p.data[2]; }
-        },
-        grid: { left: 55, right: 20, top: 20, bottom: 40 },
-        xAxis: { name: '风速 (m/s)', axisLabel: { color: '#8b8fa3' },
-                 splitLine: { lineStyle: { color: 'rgba(42,45,58,0.6)' } },
-                 axisLine: { lineStyle: { color: '#2a2d3a' } } },
-        yAxis: { name: 'AQI', axisLabel: { color: '#8b8fa3' },
-                 splitLine: { lineStyle: { color: 'rgba(42,45,58,0.6)' } },
-                 axisLine: { lineStyle: { color: '#2a2d3a' } } },
+        tooltip: Object.assign({
+            formatter:function(p){return '风速: '+p.data[0]+' m/s<br>AQI: '+p.data[1]+'<br>PM2.5: '+p.data[2];}
+        }, TT),
+        grid: {left:50,right:16,top:16,bottom:35},
+        xAxis: {name:'风速 (m/s)',axisLabel:{color:'#6d7175'},
+                splitLine:{lineStyle:{color:'#f0f1f2'}},
+                axisLine:{lineStyle:{color:'#e1e3e5'}},axisTick:{show:false}},
+        yAxis: {name:'AQI',axisLabel:{color:'#6d7175'},
+                splitLine:{lineStyle:{color:'#f0f1f2'}},axisLine:{show:false},axisTick:{show:false}},
         series: [{
-            type: 'scatter',
-            data: data.weather.wind_aqi,
-            symbolSize: function(d) { return Math.max(4, d[2] / 10); },
-            itemStyle: {
-                color: function(p) { return getAqiColor(p.data[1]); },
-                opacity: 0.5
-            }
+            type:'scatter',data:data.weather.wind_aqi,
+            symbolSize:function(d){return Math.max(3,d[2]/12);},
+            itemStyle:{color:function(p){return getAqiColor(p.data[1]);},opacity:0.45}
         }]
     });
 
@@ -197,25 +171,16 @@ function updateCharts(data) {
         loader = DataLoader.get_instance()
         df = filter_data(loader.df, filters.get("city"),
                          filters.get("start_date"), filters.get("end_date"))
-
         city = filters.get("city") or "北京"
-
-        # Gauge values
         stats = national_stats(df)
-        pm25_avg = round(df["PM2.5"].mean(), 1)
-        o3_avg = round(df["O3"].mean(), 1)
-
-        treemap = health_treemap_data(df)
-        seasonal = seasonal_pollutant_data(df, city)
-        weather = weather_correlation_data(df, city)
 
         self.push_data({
             "gauges": {
-                "pm25": pm25_avg,
-                "o3": o3_avg,
+                "pm25": round(df["PM2.5"].mean(), 1),
+                "o3": round(df["O3"].mean(), 1),
                 "aqi": stats["national_avg_aqi"],
             },
-            "treemap": treemap,
-            "seasonal": seasonal,
-            "weather": weather,
+            "treemap": health_treemap_data(df),
+            "seasonal": seasonal_pollutant_data(df, city),
+            "weather": weather_correlation_data(df, city),
         })

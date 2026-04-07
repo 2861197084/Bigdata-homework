@@ -1,40 +1,42 @@
-"""ECharts dark theme configuration."""
+"""ECharts light theme configuration — Shopify-inspired."""
 
 import json
 
 ECHARTS_THEME = {
     "color": [
-        "#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de",
-        "#3ba272", "#fc8452", "#9a60b4", "#ea7ccc", "#48b8d0",
+        "#5c6ac4", "#47c1bf", "#f49342", "#de3618", "#50b83c",
+        "#9c6ade", "#006fbb", "#f4d03f", "#b5bec9", "#00848e",
     ],
     "backgroundColor": "transparent",
     "textStyle": {
-        "color": "#e8eaed",
-        "fontFamily": "Microsoft YaHei, PingFang SC, sans-serif",
+        "color": "#303030",
+        "fontFamily": "Microsoft YaHei, Segoe UI, sans-serif",
     },
     "title": {
-        "textStyle": {"color": "#e8eaed", "fontSize": 16, "fontWeight": 500},
-        "subtextStyle": {"color": "#8b8fa3"},
+        "textStyle": {"color": "#303030", "fontSize": 14, "fontWeight": 600},
+        "subtextStyle": {"color": "#6d7175"},
     },
     "legend": {
-        "textStyle": {"color": "#e8eaed"},
+        "textStyle": {"color": "#6d7175", "fontSize": 12},
     },
     "tooltip": {
-        "backgroundColor": "rgba(26, 29, 39, 0.95)",
-        "borderColor": "#2a2d3a",
-        "textStyle": {"color": "#e8eaed", "fontSize": 13},
+        "backgroundColor": "#ffffff",
+        "borderColor": "#e1e3e5",
+        "borderWidth": 1,
+        "textStyle": {"color": "#303030", "fontSize": 12},
+        "extraCssText": "box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px;",
     },
-    "axisLine": {"lineStyle": {"color": "#2a2d3a"}},
-    "splitLine": {"lineStyle": {"color": "#2a2d3a"}},
     "categoryAxis": {
-        "axisLine": {"lineStyle": {"color": "#2a2d3a"}},
-        "axisLabel": {"color": "#8b8fa3"},
+        "axisLine": {"lineStyle": {"color": "#e1e3e5"}},
+        "axisLabel": {"color": "#6d7175"},
         "splitLine": {"show": False},
+        "axisTick": {"show": False},
     },
     "valueAxis": {
-        "axisLine": {"lineStyle": {"color": "#2a2d3a"}},
-        "axisLabel": {"color": "#8b8fa3"},
-        "splitLine": {"lineStyle": {"color": "rgba(42, 45, 58, 0.6)"}},
+        "axisLine": {"show": False},
+        "axisLabel": {"color": "#6d7175"},
+        "splitLine": {"lineStyle": {"color": "#f0f1f2"}},
+        "axisTick": {"show": False},
     },
 }
 

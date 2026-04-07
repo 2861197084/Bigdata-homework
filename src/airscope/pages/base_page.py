@@ -120,59 +120,104 @@ class BasePage(QWidget):
 
 CSS_STYLES = """
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #0f1117; }
+html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #f6f6f7;
+}
 body {
-    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
-    color: #e8eaed;
+    font-family: "Microsoft YaHei", "Segoe UI", "PingFang SC", sans-serif;
+    color: #303030;
+    -webkit-font-smoothing: antialiased;
 }
+
+/* ── Dashboard Grid ── */
 .dashboard {
-    width: 100%; height: 100%; padding: 16px;
-    display: grid; gap: 12px; overflow-y: auto;
+    width: 100%; height: 100%; padding: 20px;
+    display: grid; gap: 16px; overflow-y: auto;
 }
+
+/* ── Chart Card ── */
 .chart-box {
-    background: rgba(26, 29, 39, 0.85);
-    border: 1px solid #2a2d3a;
+    background: #ffffff;
+    border: 1px solid #e1e3e5;
     border-radius: 12px;
-    padding: 12px;
+    padding: 16px 20px;
     position: relative;
     min-height: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 .chart-box .chart-title {
-    font-size: 14px; font-weight: 500; color: #e8eaed;
-    margin-bottom: 8px; padding-left: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #303030;
+    margin-bottom: 12px;
 }
 .chart-container {
-    width: 100%; height: calc(100% - 30px); min-height: 200px;
+    width: 100%; height: calc(100% - 35px); min-height: 200px;
 }
+
+/* ── KPI Cards ── */
 .kpi-row {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
 }
 .kpi-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 18px 20px;
-    position: relative; overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e1e3e5;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
-.kpi-card::before {
-    content: ''; position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
-    pointer-events: none;
+.kpi-label {
+    font-size: 13px;
+    color: #6d7175;
+    margin-bottom: 6px;
+    font-weight: 500;
 }
-.kpi-label { font-size: 12px; color: #8b8fa3; margin-bottom: 8px; }
 .kpi-value {
-    font-size: 32px; font-weight: 700;
-    font-family: "Consolas", "DIN Alternate", "Roboto Mono", monospace;
-    line-height: 1.1;
+    font-size: 28px;
+    font-weight: 700;
+    color: #303030;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    line-height: 1.2;
 }
-.kpi-sub { font-size: 12px; color: #8b8fa3; margin-top: 6px; }
-.kpi-sub .up { color: #ee6666; }
-.kpi-sub .down { color: #91cc75; }
+.kpi-sub {
+    font-size: 12px;
+    color: #6d7175;
+    margin-top: 4px;
+}
+.kpi-sub .up { color: #de3618; }
+.kpi-sub .down { color: #50b83c; }
+
+/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #3a3d4a; }
+::-webkit-scrollbar-thumb { background: #c9cccf; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #919eab; }
+
+/* ── Data Table ── */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+table th {
+    text-align: left;
+    padding: 10px 8px;
+    color: #6d7175;
+    font-weight: 500;
+    border-bottom: 1px solid #e1e3e5;
+    font-size: 12px;
+}
+table td {
+    padding: 8px;
+    border-bottom: 1px solid #f0f1f2;
+    color: #303030;
+}
+table tr:hover td {
+    background: #f9fafb;
+}
 """
 
 # ── Static JS ──
@@ -181,12 +226,12 @@ UTILITY_JS = """
 var charts = {};
 
 function getAqiColor(value) {
-    if (value <= 50) return '#00e400';
-    if (value <= 100) return '#ffff00';
-    if (value <= 150) return '#ff7e00';
-    if (value <= 200) return '#ff0000';
-    if (value <= 300) return '#8f3f97';
-    return '#7e0023';
+    if (value <= 50)  return '#2da44e';   // 优 — muted green
+    if (value <= 100) return '#e8a020';   // 良 — warm amber
+    if (value <= 150) return '#e07b39';   // 轻度 — muted orange
+    if (value <= 200) return '#c0392b';   // 中度 — deep red
+    if (value <= 300) return '#862e9c';   // 重度 — purple
+    return '#5c2e7e';                     // 严重 — dark purple
 }
 
 function getAqiLabel(value) {
@@ -215,5 +260,5 @@ function resizeAll() {
 
 window.addEventListener('resize', resizeAll);
 
-echarts.registerTheme('airscope-dark', __THEME_JSON__);
+echarts.registerTheme('airscope', __THEME_JSON__);
 """
