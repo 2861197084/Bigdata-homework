@@ -1,9 +1,11 @@
 """Application entry point and setup."""
 
+import os
 import sys
+from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QCoreApplication, QLibraryInfo, QTimer
 
 from .ui.main_window import MainWindow
 from .ui.styles import DARK_THEME_QSS
@@ -16,8 +18,24 @@ from .pages.trends import TrendsPage
 from .pages.health import HealthPage
 
 
+def _bootstrap_qt_plugin_paths() -> None:
+    """Ensure Qt platform plugins can be found across environments."""
+    plugins_dir = Path(QLibraryInfo.path(QLibraryInfo.LibraryPath.PluginsPath))
+    if not plugins_dir.exists():
+        pyside_plugins = Path(__file__).resolve().parents[2] / "PySide6" / "Qt" / "plugins"
+        if pyside_plugins.exists():
+            plugins_dir = pyside_plugins
+
+    if plugins_dir.exists():
+        plugin_path = str(plugins_dir)
+        os.environ.setdefault("QT_PLUGIN_PATH", plugin_path)
+        os.environ.setdefault("QT_QPA_PLATFORM_PLUGIN_PATH", str(plugins_dir / "platforms"))
+        QCoreApplication.setLibraryPaths([plugin_path])
+
+
 def create_app() -> tuple[QApplication, MainWindow]:
     """Create and configure the application."""
+    _bootstrap_qt_plugin_paths()
     app = QApplication(sys.argv)
     app.setApplicationName("AirScope")
     app.setStyleSheet(DARK_THEME_QSS)
